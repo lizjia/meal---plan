@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm create *)",
+      "PowerShell(cd \"C:\\\\Users\\\\lisa.jia\\\\Meal Plan\"; npm create vite@latest . -- --template react 2>&1)",
+      "PowerShell(Get-Command node, npm, npx, bun, pnpm -ErrorAction SilentlyContinue)",
+      "Bash(python app.py)"
+    ]
+  }
+}

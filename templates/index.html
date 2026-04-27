@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fridgeplan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:      #07090f;
+  --surface: #0e1118;
+  --raised:  #161b26;
+  --border:  #1e2535;
+  --text:    #e8edf5;
+  --muted:   #4a5468;
+  --sub:     #7a8ba8;
+  --blue:    #7db8f7;
+  --blue2:   #a8d4ff;
+  --bluedim: rgba(125,184,247,.08);
+  --bluebdr: rgba(125,184,247,.2);
+  --danger:  #f07070;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 15px; }
+h1,h2,h3,.display { font-family: 'Cormorant Garamond', serif; font-weight: 300; }
+
+/* ── NAV ── */
+.topnav {
+  position: sticky; top: 0; z-index: 50;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 48px; height: 58px;
+  background: rgba(7,9,15,.85); backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+}
+.brand {
+  font-family: 'Cormorant Garamond', serif; font-size: 1.15rem;
+  font-weight: 400; letter-spacing: .12em; color: var(--text); cursor: pointer;
+  font-style: italic;
+}
+.brand em { color: var(--blue); font-style: normal; }
+.nav-links { display: flex; align-items: center; gap: 2px; }
+.nav-btn {
+  padding: 6px 14px; border-radius: 5px; border: 1px solid transparent;
+  background: transparent; color: var(--sub); cursor: pointer;
+  font-family: 'DM Sans', sans-serif; font-size: .78rem; font-weight: 500;
+  letter-spacing: .05em; transition: all .12s; white-space: nowrap;
+}
+.nav-btn:hover { color: var(--text); background: var(--surface); border-color: var(--border); }
+.nav-btn.active { color: var(--blue); background: var(--bluedim); border-color: var(--bluebdr); }
+.nav-btn-danger { color: var(--danger) !important; }
+.nav-btn-danger:hover { background: rgba(240,112,112,.08) !important; }
+
+/* ── PANELS ── */
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* ── HOME ── */
+#panel-home { min-height: calc(100vh - 58px); display: none; flex-direction: column; }
+#panel-home.active { display: flex; }
+
+.hero {
+  flex: 1; position: relative; overflow: hidden;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  min-height: 82vh;
+}
+.hero-bg {
+  position: absolute; inset: 0;
+  background-image: url('https://images.unsplash.com/photo-1543353071-873f17a7a088?w=1600&q=80&fit=crop');
+  background-size: cover; background-position: center;
+  filter: brightness(.35) saturate(.6);
+  transition: transform 8s ease;
+}
+.hero:hover .hero-bg { transform: scale(1.03); }
+.hero-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(7,9,15,.2) 0%,
+    rgba(7,9,15,.1) 30%,
+    rgba(7,9,15,.7) 70%,
+    rgba(7,9,15,.98) 100%
+  );
+}
+.hero-content {
+  position: relative; z-index: 2;
+  padding: 56px 48px; max-width: 900px;
+}
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: 'DM Sans', sans-serif; font-size: .72rem; font-weight: 500;
+  letter-spacing: .16em; text-transform: uppercase;
+  color: var(--blue); margin-bottom: 20px;
+}
+.hero-eyebrow::before {
+  content: ''; width: 24px; height: 1px; background: var(--blue); opacity: .6;
+}
+.hero-title {
+  font-family: 'Cormorant Garamond', serif; font-weight: 300;
+  font-size: clamp(4rem, 9vw, 9rem);
+  line-height: .92; letter-spacing: -.01em; color: var(--text);
+  margin-bottom: 24px;
+}
+.hero-title em { color: var(--blue); font-style: italic; }
+.hero-sub {
+  font-size: .95rem; color: var(--sub); max-width: 460px;
+  line-height: 1.75; font-weight: 300; margin-bottom: 32px;
+}
+.hero-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+.hero-ctas .btn { padding: 12px 28px; }
+
+.features-strip {
+  position: relative; z-index: 2;
+  display: grid; grid-template-columns: repeat(4,1fr);
+  border-top: 1px solid var(--border); background: var(--surface);
+}
+.feature-item {
+  padding: 28px 28px; border-right: 1px solid var(--border);
+  transition: background .2s;
+}
+.feature-item:last-child { border-right: none; }
+.feature-item:hover { background: var(--raised); }
+.feature-num {
+  font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; font-weight: 300;
+  color: var(--blue); opacity: .3; line-height: 1; margin-bottom: 10px;
+}
+.feature-item h4 {
+  font-family: 'DM Sans', sans-serif; font-size: .78rem; font-weight: 600;
+  letter-spacing: .08em; text-transform: uppercase; color: var(--text); margin-bottom: 6px;
+}
+.feature-item p { font-size: .77rem; color: var(--sub); line-height: 1.6; }
+
+/* ── INNER PAGES ── */
+.page-wrap { max-width: 980px; margin: 0 auto; padding: 48px 40px; }
+.page-header {
+  margin-bottom: 36px; padding-bottom: 24px; border-bottom: 1px solid var(--border);
+}
+.page-header h1 {
+  font-family: 'Cormorant Garamond', serif; font-size: 4rem;
+  font-weight: 300; letter-spacing: .02em; color: var(--text); line-height: 1;
+  margin-bottom: 4px;
+}
+.page-header h1 em { color: var(--blue); font-style: italic; }
+.page-num { font-size: .68rem; font-weight: 600; color: var(--blue); letter-spacing: .12em; text-transform: uppercase; }
+.hint { font-size: .8rem; color: var(--sub); }
+
+/* FORMS */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 24px; margin-bottom: 14px; }
+.field { margin-top: 14px; }
+.field-label { display: block; color: var(--sub); font-size: .68rem; font-weight: 600; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .1em; }
+input, select, textarea {
+  width: 100%; border: 1px solid var(--border); background: var(--raised);
+  color: var(--text); border-radius: 6px; padding: 10px 12px;
+  font-family: 'DM Sans', sans-serif; font-size: .88rem; outline: none; transition: border-color .12s;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--blue); }
+select option { background: var(--raised); }
+select[multiple] { min-height: 130px; }
+textarea { min-height: 80px; resize: vertical; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+.choice-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(155px,1fr)); gap: 5px; margin-top: 10px; }
+.choice-pill {
+  display: flex; align-items: center; gap: 7px;
+  border: 1px solid var(--border); background: var(--raised);
+  padding: 7px 10px; border-radius: 5px; cursor: pointer;
+  font-size: .78rem; color: var(--sub); font-weight: 400; transition: all .12s;
+}
+.choice-pill input { width: 12px; height: 12px; accent-color: var(--blue); flex-shrink: 0; }
+.choice-pill:has(input:checked) { border-color: var(--bluebdr); background: var(--bluedim); color: var(--blue); }
+
+/* BUTTONS */
+.btn {
+  border: none; border-radius: 6px; padding: 10px 20px; cursor: pointer;
+  font-family: 'DM Sans', sans-serif; font-size: .82rem; font-weight: 600;
+  letter-spacing: .04em; transition: all .15s; display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-main { background: var(--blue); color: var(--bg); }
+.btn-main:hover { background: var(--blue2); }
+.btn-main:disabled { opacity: .4; cursor: not-allowed; }
+.btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+.btn-ghost:hover { border-color: var(--blue); color: var(--blue); }
+.btn-danger { background: rgba(240,112,112,.08); border: 1px solid rgba(240,112,112,.25); color: var(--danger); }
+.save-flash { font-size: .75rem; color: var(--blue); opacity: 0; transition: opacity .2s; margin-left: 8px; }
+.save-flash.show { opacity: 1; }
+
+/* INVENTORY */
+.inventory-entry { display: grid; grid-template-columns: 1.3fr 1fr 130px auto; gap: 8px; align-items: end; }
+.inventory-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-top: 16px; }
+.bucket { min-height: 220px; background: var(--raised); border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
+.bucket.drag-over { border-color: var(--blue); }
+.bucket-title {
+  font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-weight: 400;
+  font-style: italic; color: var(--blue); margin-bottom: 10px;
+  padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.item {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px;
+  background: var(--surface); margin-bottom: 6px; cursor: grab; transition: border-color .12s;
+}
+.item:hover { border-color: var(--border); background: #1a1f2e; }
+.item strong { font-size: .84rem; font-weight: 500; }
+.item small { display: block; color: var(--sub); font-size: .72rem; }
+.empty { font-size: .76rem; color: var(--muted); border: 1px dashed var(--border); border-radius: 6px; padding: 14px; text-align: center; }
+
+/* PLAN */
+.plan-topbar { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+.plan-stats { display: flex; gap: 6px; flex-wrap: wrap; }
+.stat { font-size: .72rem; color: var(--sub); background: var(--surface); border: 1px solid var(--border); border-radius: 5px; padding: 6px 12px; font-weight: 500; }
+.stat strong { color: var(--blue); }
+.plan-controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+/* DAY CARDS */
+.plan-days { display: grid; gap: 10px; }
+.day-card { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--surface); }
+.day-toggle {
+  cursor: pointer; list-style: none;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 22px; background: var(--raised); border-bottom: 1px solid transparent; transition: background .12s;
+}
+.day-toggle::-webkit-details-marker { display: none; }
+details.day-card[open] .day-toggle { border-bottom-color: var(--border); }
+.day-toggle:hover { background: #1a1f2e; }
+.day-label {
+  font-family: 'Cormorant Garamond', serif; font-size: 1.6rem;
+  font-weight: 300; letter-spacing: .04em; color: var(--text);
+}
+.day-label span { color: var(--blue); font-style: italic; }
+.day-chevron { color: var(--muted); font-size: .72rem; transition: transform .2s; }
+details.day-card[open] .day-chevron { transform: rotate(180deg); }
+.day-body { padding: 18px 22px; }
+
+/* MEAL CARDS */
+.meal-row { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 10px; }
+.meal-box {
+  background: var(--raised); border: 1px solid var(--border);
+  border-radius: 8px; overflow: hidden; transition: border-color .2s;
+  display: flex; flex-direction: column;
+}
+.meal-box:hover { border-color: var(--bluebdr); }
+.meal-img-wrap { position: relative; height: 145px; overflow: hidden; flex-shrink: 0; }
+.meal-img { width: 100%; height: 100%; object-fit: cover; display: block; filter: brightness(.8) saturate(.9); transition: all .4s; }
+.meal-box:hover .meal-img { filter: brightness(.95) saturate(1.05); transform: scale(1.04); }
+.meal-img-bg { width: 100%; height: 100%; background: var(--surface); display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: .65rem; letter-spacing: .1em; text-transform: uppercase; }
+.meal-slot-badge {
+  position: absolute; top: 9px; left: 9px;
+  font-family: 'DM Sans', sans-serif; font-size: .6rem; font-weight: 600;
+  letter-spacing: .12em; text-transform: uppercase; padding: 3px 8px; border-radius: 3px;
+  background: rgba(7,9,15,.82); color: var(--blue);
+  border: 1px solid var(--bluebdr); backdrop-filter: blur(4px);
+}
+.meal-body { padding: 13px 14px; flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.meal-title { font-family: 'Cormorant Garamond', serif; font-size: 1.15rem; font-weight: 400; color: var(--text); line-height: 1.2; }
+.meal-desc { font-size: .76rem; color: var(--sub); line-height: 1.5; font-style: italic; }
+.meal-macros { display: flex; gap: 8px; flex-wrap: wrap; padding: 7px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.macro-pill { font-size: .68rem; color: var(--sub); }
+.macro-pill strong { color: var(--text); font-weight: 600; }
+.section-label { font-size: .6rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-top: 6px; margin-bottom: 3px; }
+.chip-wrap { display: flex; flex-wrap: wrap; gap: 4px; }
+.chip-green { font-size: .68rem; padding: 2px 7px; border-radius: 3px; background: var(--bluedim); border: 1px solid var(--bluebdr); color: var(--blue); }
+.chip-cream { font-size: .68rem; padding: 2px 7px; border-radius: 3px; background: rgba(255,255,255,.03); border: 1px solid var(--border); color: var(--sub); }
+.steps { display: grid; gap: 3px; margin-top: 2px; counter-reset: steps; }
+.step {
+  font-size: .74rem; color: var(--sub); line-height: 1.45; padding: 5px 9px;
+  border: 1px solid var(--border); border-radius: 5px; background: var(--surface);
+  counter-increment: steps; display: flex; gap: 8px; align-items: baseline;
+}
+.step::before { content: counter(steps); font-size: .6rem; color: var(--blue); flex-shrink: 0; opacity: .6; font-weight: 600; }
+.meal-link { display: inline-block; margin-top: auto; padding-top: 8px; font-size: .74rem; font-weight: 600; color: var(--blue); text-decoration: none; letter-spacing: .04em; }
+.meal-link:hover { color: var(--blue2); }
+.day-total { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); font-size: .74rem; color: var(--sub); }
+.day-total strong { color: var(--text); }
+
+/* SUNDAY */
+.sunday-card { background: var(--bluedim); border: 1px solid var(--bluebdr); border-radius: 8px; padding: 16px; margin-bottom: 12px; }
+.sunday-card h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-weight: 400; font-style: italic; color: var(--blue); margin-bottom: 8px; }
+.sunday-card p { color: var(--text); font-weight: 500; margin-bottom: 6px; font-size: .86rem; }
+.sunday-card ul { padding-left: 16px; color: var(--sub); font-size: .8rem; line-height: 1.75; }
+
+/* LOADING / ERROR */
+.loading { text-align: center; padding: 56px; color: var(--sub); font-size: .82rem; letter-spacing: .08em; }
+.loading-spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--blue); border-radius: 50%; animation: spin .7s linear infinite; vertical-align: middle; margin-left: 10px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.error { padding: 14px 16px; border: 1px solid rgba(240,112,112,.3); background: rgba(240,112,112,.06); border-radius: 6px; color: var(--danger); font-size: .84rem; }
+
+/* GROCERY */
+.grocery-btn { position: fixed; right: 24px; bottom: 24px; z-index: 20; box-shadow: 0 0 32px rgba(125,184,247,.15); }
+.grocery-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.75); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; z-index: 40; padding: 16px; }
+.grocery-overlay.open { display: flex; }
+.grocery-panel { width: min(480px,95vw); max-height: 88vh; overflow: auto; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 22px; }
+.grocery-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+.grocery-top h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-weight: 300; font-style: italic; color: var(--text); }
+.x-btn { background: transparent; border: 1px solid var(--border); color: var(--sub); font-size: .9rem; cursor: pointer; padding: 5px 9px; border-radius: 5px; transition: all .12s; }
+.x-btn:hover { color: var(--text); border-color: var(--text); }
+.check { display: flex; align-items: flex-start; gap: 10px; border: 1px solid var(--border); border-radius: 6px; padding: 9px 12px; margin-bottom: 5px; background: var(--raised); }
+.check.matched { opacity: .3; text-decoration: line-through; }
+.check input { margin-top: 3px; width: 14px; height: 14px; accent-color: var(--blue); flex-shrink: 0; }
+.check span { display: block; line-height: 1.4; font-size: .84rem; word-break: break-word; color: var(--text); }
+
+@media (max-width: 900px) {
+  .hero-content { padding: 40px 24px; }
+  .hero-title { font-size: clamp(3rem, 12vw, 5.5rem); }
+  .features-strip { grid-template-columns: 1fr 1fr; }
+  .feature-item:nth-child(2) { border-right: none; }
+  .inventory-grid { grid-template-columns: 1fr; }
+  .inventory-entry { grid-template-columns: 1fr 1fr; }
+  .page-wrap { padding: 28px 20px; }
+  .topnav { padding: 0 20px; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="topnav">
+  <div class="brand" onclick="goTo('home')"><em>Fridge</em>Plan</div>
+  <div class="nav-links">
+    <button class="nav-btn active" data-tab="home">Home</button>
+    <button class="nav-btn" data-tab="goals">Goals</button>
+    <button class="nav-btn" data-tab="inventory">Inventory</button>
+    <button class="nav-btn" data-tab="plan">Meal Plan</button>
+    <button class="nav-btn nav-btn-danger" onclick="clearAll()">Clear</button>
+  </div>
+</nav>
+
+<!-- HOME -->
+<section class="panel active" id="panel-home">
+  <div class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <div class="hero-eyebrow">AI-Powered Meal Planning</div>
+      <h1 class="hero-title">
+        What's in<br>your <em>fridge?</em>
+      </h1>
+      <p class="hero-sub">Tell us your ingredients. Get a personalised meal plan, macro tracking, grocery list, and Sunday prep guide — generated by AI in seconds.</p>
+      <div class="hero-ctas">
+        <button class="btn btn-main" onclick="goTo('goals')">Get Started</button>
+        <button class="btn btn-ghost" onclick="goTo('inventory')">Add Ingredients</button>
+      </div>
+    </div>
+  </div>
+  <div class="features-strip">
+    <div class="feature-item">
+      <div class="feature-num">01</div>
+      <h4>Fridge-First</h4>
+      <p>Recipes built around what you have. Fewest missing items always prioritised.</p>
+    </div>
+    <div class="feature-item">
+      <div class="feature-num">02</div>
+      <h4>Macro Aligned</h4>
+      <p>Set calorie and macro targets. Every meal adapts to your fitness objective.</p>
+    </div>
+    <div class="feature-item">
+      <div class="feature-num">03</div>
+      <h4>Any Cuisine</h4>
+      <p>Korean, Italian, Thai, Mexican — pick your style, AI matches it.</p>
+    </div>
+    <div class="feature-item">
+      <div class="feature-num">04</div>
+      <h4>Grocery List</h4>
+      <p>Auto-generated. Tick items off to add them straight to your inventory.</p>
+    </div>
+  </div>
+</section>
+
+<!-- GOALS -->
+<section class="panel" id="panel-goals">
+  <div class="page-wrap">
+    <div class="page-header">
+      <h1>Goals</h1>
+      <div><span class="page-num">01 / 03</span><p class="hint" style="margin-top:4px">Set your objective, macros, and preferences.</p></div>
+    </div>
+    <div class="card">
+      <div class="field">
+        <label class="field-label">Objective</label>
+        <select id="goal-objective">
+          <option value="">Select...</option>
+          <option value="lose weight">Lose weight</option>
+          <option value="maintain weight">Maintain weight</option>
+          <option value="gain muscle">Gain muscle</option>
+        </select>
+      </div>
+      <div class="row">
+        <div class="field"><label class="field-label">Calories</label><input type="number" id="goal-calories" placeholder="1800"></div>
+        <div class="field"><label class="field-label">Meals / day</label>
+          <select id="goal-meals">
+            <option value="3">3 meals</option>
+            <option value="3 + snacks">3 meals + snack</option>
+            <option value="2">2 meals</option>
+            <option value="5">5 small meals</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field"><label class="field-label">Protein (g)</label><input type="number" id="goal-protein"></div>
+        <div class="field"><label class="field-label">Carbs (g)</label><input type="number" id="goal-carbs"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label class="field-label">Fat (g)</label><input type="number" id="goal-fat"></div>
+        <div class="field"><label class="field-label">Days</label>
+          <select id="goal-days">
+            <option value="3">3</option><option value="5">5</option>
+            <option value="7" selected>7</option><option value="10">10</option>
+          </select>
+        </div>
+      </div>
+      <div class="field"><label class="field-label">Restrictions</label><input type="text" id="goal-restrictions" placeholder="e.g. no nuts, no dairy"></div>
+      <div class="field">
+        <label class="field-label">Cuisine & Diet Preferences</label>
+        <div class="hint" style="margin-bottom:8px">Cuisines apply to lunch & dinner. Breakfast and snacks stay conventional.</div>
+        <div id="goal-cuisines" class="choice-grid">
+          <label class="choice-pill"><input type="checkbox" value="italian"> Italian</label>
+          <label class="choice-pill"><input type="checkbox" value="french"> French</label>
+          <label class="choice-pill"><input type="checkbox" value="spanish"> Spanish</label>
+          <label class="choice-pill"><input type="checkbox" value="greek"> Greek</label>
+          <label class="choice-pill"><input type="checkbox" value="turkish"> Turkish</label>
+          <label class="choice-pill"><input type="checkbox" value="middle-eastern"> Middle Eastern</label>
+          <label class="choice-pill"><input type="checkbox" value="indian"> Indian</label>
+          <label class="choice-pill"><input type="checkbox" value="chinese"> Chinese</label>
+          <label class="choice-pill"><input type="checkbox" value="japanese"> Japanese</label>
+          <label class="choice-pill"><input type="checkbox" value="korean"> Korean</label>
+          <label class="choice-pill"><input type="checkbox" value="thai"> Thai</label>
+          <label class="choice-pill"><input type="checkbox" value="vietnamese"> Vietnamese</label>
+          <label class="choice-pill"><input type="checkbox" value="filipino"> Filipino</label>
+          <label class="choice-pill"><input type="checkbox" value="indonesian-malaysian"> Indonesian / Malaysian</label>
+          <label class="choice-pill"><input type="checkbox" value="mexican"> Mexican</label>
+          <label class="choice-pill"><input type="checkbox" value="caribbean"> Caribbean</label>
+          <label class="choice-pill"><input type="checkbox" value="american"> American</label>
+          <label class="choice-pill"><input type="checkbox" value="brazilian"> Brazilian</label>
+          <label class="choice-pill"><input type="checkbox" value="peruvian"> Peruvian</label>
+          <label class="choice-pill"><input type="checkbox" value="african"> African</label>
+          <label class="choice-pill"><input type="checkbox" value="vegan"> Vegan</label>
+          <label class="choice-pill"><input type="checkbox" value="vegetarian"> Vegetarian</label>
+          <label class="choice-pill"><input type="checkbox" value="pescatarian"> Pescatarian</label>
+          <label class="choice-pill"><input type="checkbox" value="keto"> Keto</label>
+          <label class="choice-pill"><input type="checkbox" value="low-carb"> Low-Carb</label>
+          <label class="choice-pill"><input type="checkbox" value="paleo"> Paleo</label>
+          <label class="choice-pill"><input type="checkbox" value="gluten-free"> Gluten-Free</label>
+          <label class="choice-pill"><input type="checkbox" value="dairy-free"> Dairy-Free</label>
+          <label class="choice-pill"><input type="checkbox" value="high-protein"> High-Protein / Fitness</label>
+          <label class="choice-pill"><input type="checkbox" value="low-calorie"> Low-Calorie / Cut</label>
+        </div>
+      </div>
+      <div style="margin-top:20px; display:flex; align-items:center;">
+        <button class="btn btn-main" onclick="saveGoals()">Save Goals</button>
+        <span class="save-flash" id="goals-saved">✓ Saved</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INVENTORY -->
+<section class="panel" id="panel-inventory">
+  <div class="page-wrap">
+    <div class="page-header">
+      <h1>Inventory</h1>
+      <div><span class="page-num">02 / 03</span><p class="hint" style="margin-top:4px">Add what's in your fridge, pantry, and staples.</p></div>
+    </div>
+    <div class="card">
+      <div class="field">
+        <label class="field-label">Upload Photo</label>
+        <input type="file" id="inventory-photo" accept="image/*">
+        <button class="btn btn-ghost" style="margin-top:8px" onclick="analyzeInventoryPhoto()">Scan Photo</button>
+        <div class="hint" id="photo-status" style="margin-top:8px"></div>
+      </div>
+      <div class="inventory-entry" style="margin-top:16px">
+        <div class="field"><label class="field-label">Ingredient</label><input type="text" id="inv-name" placeholder="Chicken breast"></div>
+        <div class="field"><label class="field-label">Quantity</label><input type="text" id="inv-qty" placeholder="500g"></div>
+        <div class="field"><label class="field-label">Type</label>
+          <select id="inv-type">
+            <option value="fridge">Fridge</option>
+            <option value="staple">Staple</option>
+            <option value="pantry">Pantry</option>
+          </select>
+        </div>
+        <button class="btn btn-main" id="add-btn" onclick="addInventoryFromInputs()" style="align-self:end">Add</button>
+      </div>
+      <div class="inventory-grid">
+        <div class="bucket" id="fridge-bucket" data-bucket="fridge">
+          <div class="bucket-title">🧊 Fridge</div>
+          <div id="fridge-list"></div>
+        </div>
+        <div class="bucket" id="staple-bucket" data-bucket="staple">
+          <div class="bucket-title">🧂 Staples</div>
+          <div id="staple-list"></div>
+        </div>
+        <div class="bucket" id="pantry-bucket" data-bucket="pantry">
+          <div class="bucket-title">🥫 Pantry</div>
+          <div id="pantry-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PLAN -->
+<section class="panel" id="panel-plan">
+  <div class="page-wrap" style="max-width:1200px">
+    <div class="page-header">
+      <h1>Meal <em>Plan</em></h1>
+      <span class="page-num">03 / 03</span>
+    </div>
+    <div class="plan-topbar">
+      <div class="plan-stats">
+        <div class="stat">Goal: <strong id="stat-goal">—</strong></div>
+        <div class="stat">Days: <strong id="stat-days">7</strong></div>
+        <div class="stat">Items: <strong id="stat-items">0</strong></div>
+      </div>
+      <div class="plan-controls">
+        <select id="plan-days" class="btn btn-ghost" style="padding:9px 14px">
+          <option value="3">3 days</option>
+          <option value="5">5 days</option>
+          <option value="7" selected>7 days</option>
+          <option value="10">10 days</option>
+        </select>
+        <button class="btn btn-main" id="generate-btn" onclick="generatePlan(false)">Generate Plan</button>
+        <button class="btn btn-ghost" id="regen-btn" onclick="generatePlan(true)">Regenerate</button>
+      </div>
+    </div>
+    <div id="plan-container" style="color:var(--muted); font-size:.9rem">Your meal plan will appear here.</div>
+  </div>
+</section>
+
+<!-- GROCERY BUTTON -->
+<button class="btn btn-main grocery-btn" onclick="openGrocery()">🛒 Grocery List</button>
+
+<!-- GROCERY OVERLAY -->
+<div class="grocery-overlay" id="grocery-overlay" onclick="overlayClose(event)">
+  <aside class="grocery-panel">
+    <div class="grocery-top">
+      <h3>Grocery List</h3>
+      <button class="x-btn" onclick="closeGrocery()">✕</button>
+    </div>
+    <div id="grocery-list" class="empty">Generate a plan to fill this list.</div>
+  </aside>
+</div>
+
+<script>
+let state = { goals: {}, inventory: [], grocery: [], checked: {}, plan: null, variation: 0 };
+let dragItemId = null;
+const OCR_INGREDIENTS = ["chicken","beef","salmon","salmon fillet","eggs","milk","yogurt","greek yogurt","rice","whole grain bread","banana","berries","spinach","broccoli","pepper","onion","garlic","potatoes","tofu","beans","crushed tomatoes","lettuce","cheese","olive oil","butter","soy sauce","turkey","tortillas","granola"];
+
+function normalizeFoodName(name){
+  return String(name||"").toLowerCase().replace(/[^a-z0-9\s]/g," ").replace(/\b(fresh|raw|organic)\b/g," ").replace(/\s+/g," ").trim().replace(/ies\b/g,"y").replace(/\b(\w{4,})s\b/g,"$1");
+}
+function fuzzyMatch(a,b){
+  const na=normalizeFoodName(a),nb=normalizeFoodName(b);
+  if(!na||!nb) return false;
+  if(na===nb||na.includes(nb)||nb.includes(na)) return true;
+  const alias={bread:["whole grain bread","whole wheat bread","toast"],salmon:["salmon fillet"],yogurt:["greek yogurt"],potato:["potatoes"],tomato:["crushed tomatoes"],broccoli:["mixed vegetables"]};
+  const expand=(v)=>{const out=[v];Object.entries(alias).forEach(([k,list])=>{const nk=normalizeFoodName(k),nl=list.map(normalizeFoodName);if(v===nk||nl.includes(v)){out.push(nk,...nl);}});return[...new Set(out)];};
+  const ea=expand(na),eb=expand(nb);
+  return ea.some(x=>eb.some(y=>x===y||x.includes(y)||y.includes(x)));
+}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function save(k,v){localStorage.setItem(k,JSON.stringify(v));}
+function flash(id){const el=document.getElementById(id);el.classList.add("show");setTimeout(()=>el.classList.remove("show"),1400);}
+
+function goTo(tab){
+  document.querySelectorAll(".nav-btn[data-tab]").forEach(n=>n.classList.remove("active"));
+  document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
+  const btn=document.querySelector(`.nav-btn[data-tab="${tab}"]`);
+  if(btn) btn.classList.add("active");
+  document.getElementById("panel-"+tab).classList.add("active");
+  window.scrollTo(0,0);
+  if(tab==="plan") updateStats();
+}
+
+function load(){
+  try{
+    state.goals=JSON.parse(localStorage.getItem("mp_goals")||"{}");
+    state.inventory=JSON.parse(localStorage.getItem("mp_inventory")||"[]");
+    state.checked=JSON.parse(localStorage.getItem("mp_grocery_checked")||"{}");
+    state.goals.days=state.goals.days||"7";
+    state.inventory=state.inventory.map(item=>{
+      if(!item.category) return{...item,category:item.is_staple?"staple":"fridge"};
+      return item;
+    });
+    if(!state.inventory.length){
+      const oldFridge=JSON.parse(localStorage.getItem("mp_fridge")||"[]");
+      const oldCondiments=JSON.parse(localStorage.getItem("mp_condiments")||"[]");
+      state.inventory=[...oldFridge.map(i=>({...i,category:"fridge"})),...oldCondiments.map(i=>({...i,category:"staple"}))];
+      save("mp_inventory",state.inventory);
+    }
+  }catch(e){}
+}
+
+document.querySelectorAll(".nav-btn[data-tab]").forEach(btn=>{
+  btn.addEventListener("click",()=>goTo(btn.dataset.tab));
+});
+
+function loadGoalsUI(){
+  const g=state.goals;
+  if(g.objective) document.getElementById("goal-objective").value=g.objective;
+  if(g.calories) document.getElementById("goal-calories").value=g.calories;
+  if(g.protein) document.getElementById("goal-protein").value=g.protein;
+  if(g.carbs) document.getElementById("goal-carbs").value=g.carbs;
+  if(g.fat) document.getElementById("goal-fat").value=g.fat;
+  if(g.days) document.getElementById("goal-days").value=g.days;
+  if(g.meals_per_day) document.getElementById("goal-meals").value=g.meals_per_day;
+  if(g.restrictions) document.getElementById("goal-restrictions").value=g.restrictions;
+  (g.cuisines||[]).forEach(v=>{const el=document.querySelector(`#goal-cuisines input[value="${v}"]`);if(el) el.checked=true;});
+  document.getElementById("plan-days").value=g.days||"7";
+  updateStats();
+}
+function saveGoals(){
+  const selectedCuisines=Array.from(document.querySelectorAll("#goal-cuisines input:checked")).map(i=>i.value);
+  state.goals={
+    objective:document.getElementById("goal-objective").value,
+    calories:document.getElementById("goal-calories").value,
+    protein:document.getElementById("goal-protein").value,
+    carbs:document.getElementById("goal-carbs").value,
+    fat:document.getElementById("goal-fat").value,
+    days:document.getElementById("goal-days").value||"7",
+    meals_per_day:document.getElementById("goal-meals").value,
+    restrictions:document.getElementById("goal-restrictions").value,
+    cuisines:selectedCuisines
+  };
+  save("mp_goals",state.goals);
+  document.getElementById("plan-days").value=state.goals.days||"7";
+  flash("goals-saved");
+}
+
+function addInventory(name,qty,category){
+  const cleanName=String(name||"").trim();
+  if(!cleanName) return;
+  const cleanCategory=category||"fridge";
+  if(state.inventory.some(i=>fuzzyMatch(i.name,cleanName)&&(i.category||"fridge")===cleanCategory)) return;
+  state.inventory.push({id:Date.now()+Math.random(),name:cleanName,quantity:(qty||"").trim(),category:cleanCategory});
+  save("mp_inventory",state.inventory);
+  reconcileGroceryWithInventory();
+  renderInventory();
+  renderGrocery();
+}
+function addInventoryFromInputs(){
+  addInventory(document.getElementById("inv-name").value,document.getElementById("inv-qty").value,document.getElementById("inv-type").value);
+  document.getElementById("inv-name").value="";
+  document.getElementById("inv-qty").value="";
+  document.getElementById("inv-name").focus();
+}
+["inv-name","inv-qty","inv-type"].forEach(id=>{
+  document.getElementById(id).addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();addInventoryFromInputs();}});
+});
+
+function removeInventory(id){
+  state.inventory=state.inventory.filter(i=>i.id!==id);
+  save("mp_inventory",state.inventory);
+  reconcileGroceryWithInventory();
+  renderInventory();
+  renderGrocery();
+}
+function renderBucket(list,targetId){
+  const target=document.getElementById(targetId);
+  if(!list.length){target.innerHTML='<div class="empty">Drop items here.</div>';return;}
+  target.innerHTML=list.map(item=>`
+    <div class="item" draggable="true" data-id="${item.id}">
+      <div><strong>${esc(item.name)}</strong><small>${esc(item.quantity||"No qty")}</small></div>
+      <button class="btn btn-danger" style="font-size:.72rem;padding:4px 9px" onclick="removeInventory(${item.id})">Remove</button>
+    </div>
+  `).join("");
+  target.querySelectorAll(".item").forEach(node=>{
+    node.addEventListener("dragstart",()=>{dragItemId=Number(node.dataset.id);});
+  });
+}
+function renderInventory(){
+  renderBucket(state.inventory.filter(i=>(i.category||"fridge")==="fridge"),"fridge-list");
+  renderBucket(state.inventory.filter(i=>(i.category||"fridge")==="staple"),"staple-list");
+  renderBucket(state.inventory.filter(i=>(i.category||"fridge")==="pantry"),"pantry-list");
+  updateStats();
+}
+function setupDropZones(){
+  document.querySelectorAll(".bucket").forEach(bucket=>{
+    bucket.addEventListener("dragover",e=>{e.preventDefault();bucket.classList.add("drag-over");});
+    bucket.addEventListener("dragleave",()=>bucket.classList.remove("drag-over"));
+    bucket.addEventListener("drop",e=>{
+      e.preventDefault();bucket.classList.remove("drag-over");
+      const item=state.inventory.find(i=>i.id===dragItemId);
+      if(item&&(item.category||"fridge")!==bucket.dataset.bucket){
+        item.category=bucket.dataset.bucket;save("mp_inventory",state.inventory);renderInventory();
+      }
+      dragItemId=null;
+    });
+  });
+}
+
+async function analyzeInventoryPhoto(){
+  const file=document.getElementById("inventory-photo").files[0];
+  const status=document.getElementById("photo-status");
+  if(!file){status.textContent="Choose a photo first.";return;}
+  status.textContent="Scanning...";
+  try{
+    const result=await Tesseract.recognize(file,"eng");
+    const text=(result.data.text||"").toLowerCase();
+    let added=0;
+    OCR_INGREDIENTS.forEach(item=>{if(text.includes(item)){addInventory(item,"","fridge");added++;}});
+    status.textContent=added?`Added ${added} ingredient(s).`:"No known ingredients found.";
+  }catch(e){status.textContent="Scan failed.";}
+}
+
+function updateStats(){
+  document.getElementById("stat-goal").textContent=state.goals.objective||"—";
+  document.getElementById("stat-days").textContent=document.getElementById("plan-days").value||state.goals.days||"7";
+  document.getElementById("stat-items").textContent=state.inventory.length;
+}
+function openGrocery(){document.getElementById("grocery-overlay").classList.add("open");}
+function closeGrocery(){document.getElementById("grocery-overlay").classList.remove("open");}
+function overlayClose(e){if(e.target.id==="grocery-overlay") closeGrocery();}
+
+function reconcileGroceryWithInventory(){
+  state.grocery=(state.grocery||[]).filter(g=>!state.inventory.some(inv=>fuzzyMatch(inv.name,g.name)));
+}
+function onCheckGrocery(name,checked){
+  state.checked[name]=checked;
+  save("mp_grocery_checked",state.checked);
+  if(checked) addInventory(name,"","fridge");
+}
+function renderGrocery(){
+  const el=document.getElementById("grocery-list");
+  reconcileGroceryWithInventory();
+  if(!state.grocery.length){el.className="empty";el.textContent="No missing items.";return;}
+  el.className="";
+  el.innerHTML=state.grocery.map(item=>{
+    const key=item.name,isChecked=!!state.checked[key],matched=state.inventory.some(inv=>fuzzyMatch(inv.name,item.name));
+    return`<label class="check ${isChecked||matched?"matched":""}">
+      <input type="checkbox" ${isChecked||matched?"checked":""} onchange="onCheckGrocery('${esc(key)}',this.checked)">
+      <span>${esc(item.name)}${item.count?` (×${item.count})`:""}</span>
+    </label>`;
+  }).join("");
+}
+
+function getMealImage(meal){
+  // image_url is now resolved server-side — just use it directly
+  if(meal.image_url && meal.image_url.startsWith("http")) return meal.image_url;
+  // Type-based fallbacks matching server-side FALLBACK_IMAGES
+  const fallbacks = {
+    breakfast: "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=400&h=280&fit=crop",
+    lunch_dinner: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=280&fit=crop",
+    snack: "https://images.unsplash.com/photo-1505576399279-565b52d4ac71?w=400&h=280&fit=crop",
+    coffee: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&h=280&fit=crop",
+  };
+  return fallbacks[meal.meal_type] || fallbacks.lunch_dinner;
+}
+
+function renderPlan(data){
+  const container=document.getElementById("plan-container");
+  if(!data||!data.days){container.innerHTML='<span style="color:var(--muted)">Your meal plan will appear here.</span>';return;}
+
+  const dayCards=data.days.map(day=>`
+    <details class="day-card" ${day.day===1?"open":""}>
+      <summary class="day-toggle">
+        <div class="day-label">DAY <span>${day.day}</span></div>
+        <span class="day-chevron">▼</span>
+      </summary>
+      <div class="day-body">
+        <div class="meal-row">
+          ${day.meals.map(meal=>`
+            <article class="meal-box">
+              <div class="meal-img-wrap">
+                <img class="meal-img" id="meal-img-${(meal.slot+'-'+day.day).replace(/\s+/g,'-')}" src="${getMealImage(meal)}" alt="${esc(meal.name)}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=meal-img-bg>NO IMAGE</div>'">
+                <span class="meal-slot-badge">${esc(meal.slot)}</span>
+              </div>
+              <div class="meal-body">
+                <div class="meal-title">${esc(meal.name)}</div>
+                ${meal.description?`<div class="meal-desc">${esc(meal.description)}</div>`:""}
+                <div class="meal-macros">
+                  <span class="macro-pill"><strong>${meal.macros.cal}</strong> kcal</span>
+                  <span class="macro-pill"><strong>${meal.macros.protein}g</strong> protein</span>
+                  <span class="macro-pill"><strong>${meal.macros.carbs}g</strong> carbs</span>
+                  <span class="macro-pill"><strong>${meal.macros.fat}g</strong> fat</span>
+                </div>
+                <div class="section-label">From your fridge</div>
+                <div class="chip-wrap">${(meal.used_inventory||[]).length?meal.used_inventory.map(i=>`<span class="chip-green">${esc(i)}</span>`).join(""):'<span class="chip-green">—</span>'}</div>
+                <div class="section-label">Still need</div>
+                <div class="chip-wrap">${(meal.needed_items||[]).length?meal.needed_items.map(i=>`<span class="chip-cream">${esc(i)}</span>`).join(""):'<span class="chip-cream">Nothing</span>'}</div>
+                <div class="section-label">How to make it</div>
+                <div class="steps">${(meal.quick_steps||[]).map(s=>`<div class="step">${esc(s)}</div>`).join("")}</div>
+                <a class="meal-link" href="${esc(meal.recipe_url)}" target="_blank" rel="noopener">View recipe →</a>
+              </div>
+            </article>
+          `).join("")}
+        </div>
+        <div class="day-total">Daily total: <strong>${day.subtotal.cal} kcal</strong> &nbsp;·&nbsp; ${day.subtotal.protein}g protein &nbsp;·&nbsp; ${day.subtotal.carbs}g carbs &nbsp;·&nbsp; ${day.subtotal.fat}g fat</div>
+      </div>
+    </details>
+  `).join("");
+
+  const sunday=data.sunday_prep?`
+    <div class="sunday-card">
+      <h3>☀ SUNDAY PREP</h3>
+      <p style="color:var(--cream);font-weight:600;margin-bottom:6px">${esc(data.sunday_prep.title)}</p>
+      <ul>${(data.sunday_prep.notes||[]).map(n=>`<li>${esc(n)}</li>`).join("")}</ul>
+    </div>`:""
+
+  container.innerHTML=`<div class="plan-days">${sunday}${dayCards}</div>`;
+
+
+}
+
+async function generatePlan(isRegenerate){
+  if(isRegenerate) state.variation+=1;
+  const btn=document.getElementById("generate-btn");
+  const container=document.getElementById("plan-container");
+  btn.disabled=true;
+  container.innerHTML='<div class="loading">Generating<span class="loading-spinner"></span></div>';
+  const requestedDays=Number(document.getElementById("plan-days").value||state.goals.days||7);
+  state.goals.days=String(requestedDays||7);
+  save("mp_goals",state.goals);
+  updateStats();
+  try{
+    const res=await fetch("/generate",{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({goals:state.goals,inventory:state.inventory,days:requestedDays||7,variation:state.variation})
+    });
+    const data=await res.json();
+    if(data.error){container.innerHTML=`<div class="error">${esc(data.error)}</div>`;return;}
+    state.plan=data;state.grocery=data.grocery_list||[];
+    reconcileGroceryWithInventory();
+    renderPlan(data);renderGrocery();openGrocery();
+  }catch(e){
+    container.innerHTML=`<div class="error">Network error: ${esc(e.message)}</div>`;
+  }finally{btn.disabled=false;}
+}
+
+function clearAll(){
+  if(!confirm("Clear all saved data?")) return;
+  ["mp_goals","mp_inventory","mp_fridge","mp_condiments","mp_grocery_checked"].forEach(k=>localStorage.removeItem(k));
+  state={goals:{},inventory:[],grocery:[],checked:{},plan:null,variation:0};
+  loadGoalsUI();renderInventory();renderGrocery();
+  document.getElementById("plan-container").innerHTML='<span style="color:var(--muted)">Your meal plan will appear here.</span>';
+}
+
+load();loadGoalsUI();renderInventory();renderGrocery();updateStats();setupDropZones();
+</script>
+</body>
+</html>
